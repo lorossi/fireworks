@@ -1,0 +1,42 @@
+@font-face {
+  font-family: FFFFORWA;
+  src: url(\assets\FFFFORWA.ttf);
+}
+
+body, body * {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: FFFFORWA;
+}
+
+a {
+  color: inherit;
+}
+
+#sketch {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.left {
+  position: absolute;
+  left: 1.6vh;
+}
+
+.right {
+  position: absolute;
+  right: 1.6vh;
+}
+
+#credits {
+  position: absolute;
+  bottom: 1.6vh;
+  z-index: 20;
+  color: white;
+  font-size: 20px;
+}
