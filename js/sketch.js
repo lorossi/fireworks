@@ -18,7 +18,7 @@ function setup() {
     margin = 0.2;
     fps = 60;
   } else {
-    fireworks_number = 2;
+    fireworks_number = 8;
     margin = 0.3;
     fps = 30;
     pixelDensity(2);
