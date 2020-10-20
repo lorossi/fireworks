@@ -28,14 +28,14 @@ function setup() {
     fireworks_number = 20;
     margin = 0.2;
   } else {
-    fireworks_number = 7;
+    fireworks_number = 2;
     margin = 0.3;
   }
 
   starting_fireworks = 2;
   show_version = true;
   show_fps = true;
-  version = "1.0.1";
+  version = "1.0.2";
 
   fps_len = 10; // number of fps to record and later average
   old_fps = [];
@@ -94,9 +94,9 @@ function draw() {
   if (fireworks.length < fireworks_number) {
     // if we have less fireworks than the starting number, add some of them
     // otherwise, we add them randomly (1% each frame)
-    if (random(100) <= 1 || fireworks.length < starting_fireworks) {
+    if (randomBetween(0, 90) <= 1 || fireworks.length < starting_fireworks) {
       let fx, fy;
-      fx = random(margin, 1-margin) * width;
+      fx = randomBetween(margin, 1-margin) * width;
       fy = height;
       fireworks.push(
         new Firework(fx, fy)
@@ -138,7 +138,7 @@ function draw() {
   }
   for (let i = 0; i < deleted; i++) {
     let fx, fy;
-    fx = random(margin, 1-margin) * width;
+    fx = randomBetween(margin, 1-margin) * width;
     fy = height;
     fireworks.push(
       new Firework(fx, fy)
@@ -172,6 +172,11 @@ function wrap(val, min, max) {
   return val;
 }
 
+function randomBetween(min, max) {
+  // faster than native p5js random function
+  return Math.random() * (max - min) + min;
+}
+
 class Title {
   constructor(font) {
     this.font = font;
@@ -189,8 +194,8 @@ class Title {
 
     this.text = "FIREWORKS!";
 
-    this.phi = random(1) * TWO_PI; // initial phase
-    this.period = 60 * random(1.8, 2.2); // rotation period
+    this.phi = randomBetween(0, TWO_PI);// initial phase
+    this.period = 60 * randomBetween(1.8, 2.2); // rotation period
     this.zoom = 1;
 
     this.calculateTheta();
@@ -241,7 +246,7 @@ class Disclaimer {
       this.font_size = 20;
       this.y_offset = this.font_size;
     } else {
-      this.text = "tap to enable sounds effects";
+      this.text = "tap to enable sounds effects\n\nthis website might be very slow on mobile";
       this.font_size = 26;
       this.y_offset = 8 * this.font_size;
     }
@@ -292,26 +297,28 @@ class Firework {
     this.position = createVector(x, y);
 
     if (displayWidth > 600) { // big screen
-      this.max_height = random(0.6, 0.8) * height;
-      this.wind = random(-1, 1) * PI / 20; // horizontal velocity
+      this.max_height = randomBetween(0.6, 0.8) * height;
+      this.wind = randomBetween(-1, 1) * PI / 20; // horizontal velocity
       this.size = 4;
+      this.queue_length = 4;
     } else {
-      this.max_height = random(0.4, 0.9) * height;
-      this.wind = random(-1, 1) * PI / 30; // horizontal velocity
+      this.max_height = randomBetween(0.4, 0.9) * height;
+      this.wind = randomBetween(-1, 1) * PI / 30; // horizontal velocity
       this.size = 7;
+      this.queue_length = 1;
     }
 
-    this.speed = random(4, 10);
+    this.speed = randomBetween(4, 10);
 
     this.velocity = createVector(0, -this.speed).rotate(this.wind);
     this.g = 0.5 * Math.pow(this.speed, 2) / this.max_height; // vertical acceleration
     this.acceleration = createVector(0, this.g);
 
     this.old_pos = [];
-    this.queue_length = 4;
+
 
     this.max_colors = 2;
-    this.has_sparkles = random(1) > .5;
+    this.has_sparkles = randomBetween(0, 1) > .5;
   }
 
   show() {
@@ -353,21 +360,22 @@ class Firework {
       this.alive = false;
 
       // add trails
-      let particles_number, phi, speed, life;
-      particles_number = Math.floor(random(10, 20));
-      phi = random(TWO_PI);
-      speed = random(2, 3);
-      life = random(1, 2) * 60;
+      let particles_number, phi, speed, life, sparkles_set;
+      particles_number = Math.floor(randomBetween(10, 20));
+      phi = randomBetween(0, TWO_PI);
+      speed = randomBetween(2, 3);
+      life = randomBetween(1, 2) * 60;
+      sparkles_set = Math.floor(randomBetween(1, 6));
 
       let colors, hue;
-      colors = Math.floor(random(1, this.max_colors + 1));
+      colors = Math.floor(randomBetween(1, this.max_colors + 1));
       hue = [];
       for (let i = 0; i < colors; i++) {
-        hue.push(random(100));
+        hue.push(randomBetween(0, 100));
       }
 
       let seed;
-      seed = random(1000);
+      seed = randomBetween(0, 1000);
 
       for (let j = 0; j < colors; j++) {
         for (let i = 0; i < particles_number; i++) { // add trails
@@ -375,19 +383,22 @@ class Firework {
           heading = TWO_PI / particles_number * i + phi + PI/2 * j / colors;
 
           let dspeed, dlife, dhue, dalpha; // to add some variance to each trail
-          dspeed = random(-1, 1) * .03 * abs(cos(heading + seed));;
-          dlife = random(-1, 1) * life * 0.2;
-          dhue = random(-1, 1) * 2;
-          dalpha = random(-5, 5);
+          dspeed = randomBetween(-1, 1) * .03 * abs(cos(heading + seed));;
+          dlife = randomBetween(-1, 1) * life * 0.2;
+          dhue = randomBetween(-1, 1) * 2;
+          dalpha = randomBetween(-5, 5);
 
           trails.push(
             new Trail(this.position.x, this.position.y, heading, speed + dspeed, life + dlife, hue[j] + dhue, dalpha)
           );
 
           if (this.has_sparkles) {
-            sparkles.push(
-              new Sparkle(this.position.x, this.position.y, heading, speed * 1.25 + dspeed, (life + dlife) * 1.5, hue[j] + dhue, dalpha)
-            );
+
+            for (let k = 0; k < sparkles_set; k++) {
+              sparkles.push(
+                new Sparkle(this.position.x, this.position.y, heading, speed * 1.1 * (k + 1) / sparkles_set + dspeed, (life + dlife) * 1.5, hue[j] + dhue, dalpha)
+              );
+            }
           }
         }
       }
@@ -403,10 +414,14 @@ class Trail {
     this.velocity = createVector(speed, 0).rotate(heading);
 
     this.created = frameCount;
-    this.life = life;
+
 
     if (displayWidth < 600) { // small screen -> longest life
-      this.life *= 1.5;
+      this.life = life * 1.5;
+      this.nth_particle = 5;
+    } else {
+      this.life = life;
+      this.nth_particle = 10;
     }
 
     this.hue = wrap(hue, 0, 100);
@@ -416,11 +431,11 @@ class Trail {
 
     this.alpha = 127;
 
-    this.g = random(0.02, 0.04);
+    this.g = randomBetween(0.02, 0.04);
     this.acceleration = createVector(0, this.g);
     this.size = 2;
 
-    this.nth_particle = 10;
+
   }
 
   show() {
@@ -471,7 +486,7 @@ class Sparkle extends Trail {
     translate(this.position.x, this.position.y);
     noStroke();
     fill(this.hue, 100, 100, this.alpha);
-    circle(0, 0, this.size);
+    circle(0, 0, this.size * 1.5);
     pop();
   }
 }
