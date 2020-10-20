@@ -24,7 +24,7 @@ function setup() {
 
   // SKETCH PARAMETERS
   if (displayWidth > 600) {
-    fireworks_number = 15;
+    fireworks_number = 20;
     margin = 0.2;
   } else {
     fireworks_number = 7;
@@ -114,7 +114,7 @@ function draw() {
       let balance; // audio pan (left-right)
       balance = map(fireworks[i].position.x, 0, width, -1, 1);
       explosion_sound.pan(balance);
-      explosion_sound.play();
+      explosion_sound.play(); // this will throw a LOT of errors. Why? I don't know either. I'm waiting for an updated version.
 
       fireworks.splice(i, 1); // remove dead firework
       deleted++;
