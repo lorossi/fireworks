@@ -26,16 +26,15 @@ function setup() {
   if (displayWidth > 600) {
     fireworks_number = 20;
     margin = 0.2;
-    show_fps = true;
   } else {
     fireworks_number = 7;
     margin = 0.3;
-    show_fps = false;
   }
-  
+
   starting_fireworks = 2;
   show_version = true;
-  version = "1.0";
+  show_fps = true;
+  version = "1.0.1";
 }
 
 function draw() {
@@ -43,13 +42,14 @@ function draw() {
 
   // show fps
   if (show_fps) {
+    let fps = `FPS: ${Math.floor(frameRate())}`;
     push();
     translate(20, 40);
     rectMode(CENTER);
     textFont(font);
     noStroke();
-    fill(250, 100, 50);
-    text(Math.floor(frameRate()), 0, 0);
+    fill(250, 50);
+    text(fps, 0, 0);
     pop();
   }
 
