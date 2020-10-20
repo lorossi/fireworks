@@ -3,6 +3,7 @@ let fireworks_number, margin, starting_fireworks, show_fps, show_version, versio
 let explosion_sound; // sound
 let audio_started; // audio context started
 let font;
+let fps_len, old_fps;
 
 function preload() {
   soundFormats("mp3");
@@ -35,6 +36,12 @@ function setup() {
   show_version = true;
   show_fps = true;
   version = "1.0.1";
+
+  fps_len = 10; // number of fps to record and later average
+  old_fps = [];
+  for (let i = 0; i < fps_len; i++) {
+    old_fps.push(0);
+  }
 }
 
 function draw() {
@@ -42,21 +49,28 @@ function draw() {
 
   // show fps
   if (show_fps) {
-    let fps = `FPS: ${Math.floor(frameRate())}`;
+    let fps_avg, text_str;
+    fps_avg = 0;
+    for (let i = 0; i < fps_len; i++) {
+      fps_avg += old_fps[i];
+    }
+    fps_avg = Math.floor(fps_avg / fps_len);
+    text_str = `FPS: ${fps_avg}`;
+
     push();
     translate(20, 40);
     rectMode(CENTER);
     textFont(font);
     noStroke();
     fill(250, 50);
-    text(fps, 0, 0);
+    text(text_str, 0, 0);
     pop();
   }
 
   // show version
   if (show_version) {
     push();
-    translate(width - 100, 40);
+    translate(width - 120, 40);
     rectMode(CENTER);
     textFont(font);
     noStroke();
@@ -143,6 +157,12 @@ function draw() {
     if (!sparkles[i].alive) {
       sparkles.splice(i, 1);
     }
+  }
+
+  // append fps to calculate average frameRate
+  old_fps.push(frameRate());
+  if (old_fps.length > fps_len) {
+    old_fps.shift();
   }
 }
 
