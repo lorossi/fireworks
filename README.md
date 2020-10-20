@@ -6,7 +6,11 @@ Simply navigate [here](http://lorossi.github.io/fireworks) and watch the exibiti
 
 ## Features
 -Sound effects!
+
 -Scalable!
+
 -Colorful and random!
+
 -Always different!
+
 -Super heavy on the browser - **CAN** and **WILL** lag older devices! (thanks, JavaScript)
