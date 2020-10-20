@@ -3,7 +3,7 @@ let fireworks_number, margin, starting_fireworks, show_fps, show_version, versio
 let explosion_sound; // sound
 let audio_started; // audio context started
 let font;
-let fps_len, old_fps;
+let fps, fps_avg, fps_len, old_fps;
 
 function preload() {
   soundFormats("mp3");
@@ -12,51 +12,58 @@ function preload() {
 }
 
 function setup() {
+  // SKETCH PARAMETERS
+  if (displayWidth > 600) {
+    fireworks_number = 20;
+    margin = 0.2;
+    fps = 60;
+  } else {
+    fireworks_number = 2;
+    margin = 0.3;
+    fps = 30;
+    pixelDensity(2);
+  }
+
   let canvas = createCanvas(windowWidth, windowHeight);
   canvas.parent('sketch');
+  frameRate(fps);
   colorMode(HSB, 100);
 
+  starting_fireworks = 2;
+  show_version = true;
+  show_fps = true;
+  version = "1.0.3";
+
+  fps_avg = fps;
+  fps_len = 10; // number of fps to record and later average
+  old_fps = [];
+  for (let i = 0; i < fps_len; i++) {
+    old_fps.push(fps);
+  }
+
+  // objects creation
   fireworks = [];
   trails = [];
   sparkles = [];
   title = new Title(font);
   disclaimer = new Disclaimer(font);
   audio_started = false;
-
-  // SKETCH PARAMETERS
-  if (displayWidth > 600) {
-    fireworks_number = 20;
-    margin = 0.2;
-  } else {
-    fireworks_number = 2;
-    margin = 0.3;
-  }
-
-  starting_fireworks = 2;
-  show_version = true;
-  show_fps = true;
-  version = "1.0.2";
-
-  fps_len = 10; // number of fps to record and later average
-  old_fps = [];
-  for (let i = 0; i < fps_len; i++) {
-    old_fps.push(0);
-  }
 }
 
 function draw() {
   background(5);
 
+  // calculate fps
+  fps_avg = 0;
+  for (let i = 0; i < fps_len; i++) {
+    fps_avg += old_fps[i];
+  }
+  fps_avg = Math.floor(fps_avg / fps_len);
+
   // show fps
   if (show_fps) {
-    let fps_avg, text_str;
-    fps_avg = 0;
-    for (let i = 0; i < fps_len; i++) {
-      fps_avg += old_fps[i];
-    }
-    fps_avg = Math.floor(fps_avg / fps_len);
+    let text_str;
     text_str = `FPS: ${fps_avg}`;
-
     push();
     translate(20, 40);
     rectMode(CENTER);
@@ -187,15 +194,15 @@ class Title {
       this.font_size = 80;
     }
 
-    this.life = 2 * 60;
-    this.fade_time = 2 * 60;
+    this.life = 2 * fps;
+    this.fade_time = 2 * fps;
     this.alive = true;
     this.fading = false;
 
     this.text = "FIREWORKS!";
 
     this.phi = randomBetween(0, TWO_PI);// initial phase
-    this.period = 60 * randomBetween(1.8, 2.2); // rotation period
+    this.period = fps_avg * randomBetween(1.8, 2.2); // rotation period
     this.zoom = 1;
 
     this.calculateTheta();
@@ -246,12 +253,12 @@ class Disclaimer {
       this.font_size = 20;
       this.y_offset = this.font_size;
     } else {
-      this.text = "tap to enable sounds effects\n\nthis website might be very slow on mobile";
+      this.text = "tap to enable sounds effects\n\nthis website might be very slow on mobile\n\nfor better results, use a PC browser";
       this.font_size = 26;
-      this.y_offset = 8 * this.font_size;
+      this.y_offset = 10 * this.font_size;
     }
 
-    this.fade_time = 2 * 60;
+    this.fade_time = 2 * fps;
     this.fade_start = 0;
     this.alive = true;
     this.fading = false;
@@ -308,7 +315,7 @@ class Firework {
       this.queue_length = 1;
     }
 
-    this.speed = randomBetween(4, 10);
+    this.speed = randomBetween(4, 10) * 60 / fps;
 
     this.velocity = createVector(0, -this.speed).rotate(this.wind);
     this.g = 0.5 * Math.pow(this.speed, 2) / this.max_height; // vertical acceleration
@@ -364,7 +371,7 @@ class Firework {
       particles_number = Math.floor(randomBetween(10, 20));
       phi = randomBetween(0, TWO_PI);
       speed = randomBetween(2, 3);
-      life = randomBetween(1, 2) * 60;
+      life = randomBetween(1, 2) * fps_avg;
       sparkles_set = Math.floor(randomBetween(1, 6));
 
       let colors, hue;
