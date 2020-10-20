@@ -26,12 +26,14 @@ function setup() {
   if (displayWidth > 600) {
     fireworks_number = 20;
     margin = 0.2;
+    show_fps = true;
   } else {
     fireworks_number = 7;
     margin = 0.3;
+    show_fps = false;
   }
+  
   starting_fireworks = 2;
-  show_fps = false;
   show_version = true;
   version = "1.0";
 }
