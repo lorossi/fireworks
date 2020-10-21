@@ -23,9 +23,9 @@ function setup() {
     fireworks_number = 5;
     margin = 0.3;
     fps = 30;
-    pixelDensity(2);
   }
 
+  pixelDensity(2);
   let canvas = createCanvas(windowWidth, windowHeight);
   canvas.parent('sketch');
   frameRate(fps);
@@ -33,7 +33,7 @@ function setup() {
 
   show_version = true;
   show_fps = true;
-  version = "1.0.4";
+  version = "1.0.5";
 
   fps_avg = fps;
   fps_len = 10; // number of fps to record and later average
@@ -373,7 +373,7 @@ class Firework {
       phi = randomBetween(0, TWO_PI);
       speed = randomBetween(2, 3);
       life = randomBetween(1, 2) * fps_avg;
-      sparkles_set = Math.floor(randomBetween(1, 6));
+      sparkles_set = Math.floor(randomBetween(1, 4));
 
       let colors, hue;
       colors = Math.floor(randomBetween(1, this.max_colors + 1));
