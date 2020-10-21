@@ -14,11 +14,13 @@ function preload() {
 function setup() {
   // SKETCH PARAMETERS
   if (displayWidth > 600) {
-    fireworks_number = 20;
+    starting_fireworks = 2;
+    fireworks_number = 10;
     margin = 0.2;
     fps = 60;
   } else {
-    fireworks_number = 8;
+    starting_fireworks = 1;
+    fireworks_number = 5;
     margin = 0.3;
     fps = 30;
     pixelDensity(2);
@@ -29,10 +31,9 @@ function setup() {
   frameRate(fps);
   colorMode(HSB, 100);
 
-  starting_fireworks = 2;
   show_version = true;
   show_fps = true;
-  version = "1.0.3";
+  version = "1.0.4";
 
   fps_avg = fps;
   fps_len = 10; // number of fps to record and later average
