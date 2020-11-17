@@ -5,6 +5,8 @@ let audio_started; // audio context started
 let font;
 let fps, fps_avg, fps_len, old_fps;
 
+let window_width;
+
 function preload() {
   soundFormats("mp3");
   explosion_sound = loadSound('assets/explosion');
@@ -13,20 +15,26 @@ function preload() {
 
 function setup() {
   // SKETCH PARAMETERS
+  let w, h;
+  window_width = displayWidth;
+
   if (displayWidth > 600) {
     starting_fireworks = 2;
     fireworks_number = 10;
     margin = 0.2;
     fps = 60;
+    w = windowWidth;
+    h = windowHeight;
   } else {
     starting_fireworks = 1;
     fireworks_number = 5;
     margin = 0.3;
     fps = 30;
+    w = windowWidth / 4;
+    h = windowHeight / 4;
   }
 
-  pixelDensity(2);
-  let canvas = createCanvas(windowWidth, windowHeight);
+  let canvas = createCanvas(w, h);
   canvas.parent('sketch');
   frameRate(fps);
   colorMode(HSB, 100);
@@ -500,7 +508,20 @@ class Sparkle extends Trail {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  if (window_width == displayWidth) { // preevent resizing triggered by scrolling on small devices
+    return;
+  }
+
+  window_width = displayWidth;
+  let w, h;
+  if (windowWidth > 600) {
+    w = windowWidth;
+    h = windowHeight;
+  } else {
+    w = windowWidth / 4;
+    h = windowHeight / 4;
+  }
+  resizeCanvas(w, h);
 }
 
 function mouseClicked() {
