@@ -5,6 +5,7 @@ let audio_started; // audio context started
 let font;
 let fps, fps_avg, fps_len, old_fps;
 
+let buffer, stretched_buffer;
 let window_width;
 
 function preload() {
@@ -14,9 +15,10 @@ function preload() {
 }
 
 function setup() {
+  console.log("avc");
   // SKETCH PARAMETERS
-  window_width = displayWidth;
-  if (displayWidth > 600) {
+  window_width = windowWidth;
+  if (windowWidth > 600) {
     starting_fireworks = 2;
     fireworks_number = 5;
     margin = 0.2;
@@ -29,11 +31,14 @@ function setup() {
   }
 
   let size = calculateSize();
-  let canvas = createCanvas(size.width, size.height);
+  buffer = createGraphics(size.width, size.height);
+  stretched_buffer = createGraphics(windowWidth, windowHeight);
+  let canvas = createCanvas(windowWidth, windowHeight);
   canvas.parent('sketch');
 
-  frameRate(fps);
-  colorMode(HSB, 100);
+  buffer.frameRate(fps);
+  buffer.colorMode(HSB, 100);
+  stretched_buffer.colorMode(HSB, 100);
 
   show_version = true;
   show_fps = true;
@@ -56,7 +61,7 @@ function setup() {
 }
 
 function draw() {
-  background(5);
+  buffer.background(5);
 
   // calculate fps
   fps_avg = 0;
@@ -69,26 +74,26 @@ function draw() {
   if (show_fps) {
     let text_str;
     text_str = `FPS: ${fps_avg}`;
-    push();
-    translate(20, 40);
-    rectMode(CENTER);
-    textFont(font);
-    noStroke();
-    fill(250, 50);
-    text(text_str, 0, 0);
-    pop();
+    buffer.push();
+    buffer.translate(20, 40);
+    buffer.rectMode(CENTER);
+    buffer.textFont(font);
+    buffer.noStroke();
+    buffer.fill(250, 50);
+    buffer.text(text_str, 0, 0);
+    buffer.pop();
   }
 
   // show version
   if (show_version) {
-    push();
-    translate(width - 120, 40);
-    rectMode(CENTER);
-    textFont(font);
-    noStroke();
-    fill(250, 50);
-    text(`Version: ${version}`, 0, 0);
-    pop();
+    buffer.push();
+    buffer.translate(width - 120, 40);
+    buffer.rectMode(CENTER);
+    buffer.textFont(font);
+    buffer.noStroke();
+    buffer.fill(250, 50);
+    buffer.text(`Version: ${version}`, 0, 0);
+    buffer.pop();
   }
 
   // show title
@@ -108,7 +113,7 @@ function draw() {
     // otherwise, we add them randomly (1% each frame)
     if (randomBetween(0, 90) <= 1 || fireworks.length < starting_fireworks) {
       let fx, fy;
-      fx = randomBetween(margin, 1-margin) * width;
+      fx = randomBetween(margin, 1-margin) * buffer.width;
       fy = height;
       fireworks.push(
         new Firework(fx, fy)
@@ -134,6 +139,12 @@ function draw() {
     s.move();
   })
 
+  // stretch buffer to fill canvas
+  stretched_buffer.image(buffer, 0, 0, sketch.width, sketch.height);
+  buffer = stretched_buffer;
+  //copy buffer to actual canvas
+  image(buffer, 0, 0, sketch.width, sketch.height);
+
   // remove explosed fireworks and add new
   let deleted; // number of deleted fireworks
   deleted = 0;
@@ -150,7 +161,7 @@ function draw() {
   }
   for (let i = 0; i < deleted; i++) {
     let fx, fy;
-    fx = randomBetween(margin, 1-margin) * width;
+    fx = randomBetween(margin, 1-margin) * buffer.width;
     fy = height;
     fireworks.push(
       new Firework(fx, fy)
@@ -193,7 +204,7 @@ class Title {
   constructor(font) {
     this.font = font;
 
-    if (displayWidth > 600) {
+    if (windowWidth > 600) {
       this.font_size = 96;
     } else {
       this.font_size = 80;
@@ -227,17 +238,17 @@ class Title {
     }
     this.calculateTheta();
 
-    push();
-    translate(width/2, height/2);
-    rotate(this.theta);
-    scale(this.zoom);
-    textAlign(CENTER);
-    rectMode(CENTER);
-    fill(250, alpha);
-    textSize(this.font_size);
-    textFont(this.font);
-    text(this.text, 0, 0);
-    pop();
+    buffer.push();
+    buffer.translate(buffer.width/2, buffer.height/2);
+    buffer.rotate(this.theta);
+    buffer.scale(this.zoom);
+    buffer.textAlign(CENTER);
+    buffer.rectMode(CENTER);
+    buffer.fill(250, alpha);
+    buffer.textSize(this.font_size);
+    buffer.textFont(this.font);
+    buffer.text(this.text, 0, 0);
+    buffer.pop();
   }
 
   update() {
@@ -253,7 +264,7 @@ class Disclaimer {
   constructor(font) {
     this.font = font;
 
-    if (displayWidth > 600) {
+    if (windowWidth > 600) {
       this.text = "click to enable sounds effects";
       this.font_size = 20;
       this.y_offset = this.font_size;
@@ -277,15 +288,15 @@ class Disclaimer {
       alpha = 255;
     }
 
-    push();
-    translate(width/2, height - this.y_offset);
-    textAlign(CENTER);
-    rectMode(CENTER);
-    fill(250, alpha);
-    textSize(this.font_size);
-    textFont(this.font);
-    text(this.text, 0, 0);
-    pop();
+    buffer.push();
+    buffer.translate(buffer.width/2, buffer.height - this.y_offset);
+    buffer.textAlign(CENTER);
+    buffer.rectMode(CENTER);
+    buffer.fill(250, alpha);
+    buffer.textSize(this.font_size);
+    buffer.textFont(this.font);
+    buffer.text(this.text, 0, 0);
+    buffer.pop();
   }
 
   update() {
@@ -308,7 +319,7 @@ class Firework {
     this.exploded = false;
     this.position = createVector(x, y);
 
-    if (displayWidth > 600) { // big screen
+    if (windowWidth > 600) { // big screen
       this.max_height = randomBetween(0.6, 0.8) * height;
       this.wind = randomBetween(-1, 1) * PI / 20; // horizontal velocity
       this.size = 4;
@@ -335,23 +346,23 @@ class Firework {
 
   show() {
     // draw firework
-    push();
-    translate(this.position.x, this.position.y);
-    noStroke();
-    fill(255);
-    circle(0, 0, this.size);
-    pop();
+    buffer.push();
+    buffer.translate(this.position.x, this.position.y);
+    buffer.noStroke();
+    buffer.fill(255);
+    buffer.circle(0, 0, this.size);
+    buffer.pop();
 
     // add some trail to it
-    push();
-    stroke(255, 75);
-    noFill();
-    beginShape();
+    buffer.push();
+    buffer.stroke(255, 75);
+    buffer.noFill();
+    buffer.beginShape();
     for (let i = 0; i < this.old_pos.length; i++) {
-      curveVertex(this.old_pos[i].x, this.old_pos[i].y);
+      buffer.curveVertex(this.old_pos[i].x, this.old_pos[i].y);
     }
-    endShape();
-    pop();
+    buffer.endShape();
+    buffer.pop();
   }
 
   move() {
@@ -377,7 +388,7 @@ class Firework {
       phi = randomBetween(0, TWO_PI);
       speed = randomBetween(2, 3);
       life = randomBetween(1, 2) * fps_avg;
-      sparkles_set = Math.floor(randomBetween(1, 4));
+      sparkles_set = Math.floor(randomBetween(1, 5));
 
       let colors, hue;
       colors = Math.floor(randomBetween(1, this.max_colors + 1));
@@ -428,7 +439,7 @@ class Trail {
     this.created = frameCount;
 
 
-    if (displayWidth < 600) { // small screen -> longest life
+    if (windowWidth < 600) { // small screen -> longest life
       this.life = life * 1.5;
       this.nth_particle = 5;
     } else {
@@ -455,26 +466,26 @@ class Trail {
     age = frameCount - this.created;
     weight = map(age, 0, this.life, 3, 0);
 
-    push();
-    noFill();
-    stroke(this.hue, 100, 100, this.alpha);
-    strokeWeight(weight);
+    buffer.push();
+    buffer.noFill();
+    buffer.stroke(this.hue, 100, 100, this.alpha);
+    buffer.strokeWeight(weight);
 
-    beginShape();
+    buffer.beginShape();
     this.old_pos.forEach((p, i) => {
       if (i % this.nth_particle == 0 || i < this.nth_particle) {
-        curveVertex(p.x, p.y);
+        buffer.curveVertex(p.x, p.y);
       }
     })
 
     // honestly i don't understand why the following section works
     // appartently shapes skip the last point or something
-    curveVertex(this.position.x, this.position.y);
-    curveVertex(this.position.x, this.position.y);
-    endShape();
+    buffer.curveVertex(this.position.x, this.position.y);
+    buffer.curveVertex(this.position.x, this.position.y);
+    buffer.endShape();
 
-    circle(this.position.x, this.position.y, this.size);
-    pop();
+    buffer.circle(this.position.x, this.position.y, this.size);
+    buffer.pop();
 
   }
 
@@ -494,29 +505,37 @@ class Trail {
 
 class Sparkle extends Trail {
   show() {
-    push();
-    translate(this.position.x, this.position.y);
-    noStroke();
-    fill(this.hue, 100, 100, this.alpha);
-    circle(0, 0, this.size * 1.5);
-    pop();
+    buffer.push();
+    buffer.translate(this.position.x, this.position.y);
+    buffer.noStroke();
+    buffer.fill(this.hue, 100, 100, this.alpha);
+    buffer.circle(0, 0, this.size * 1.5);
+    buffer.pop();
   }
 }
 
 function calculateSize() {
-  w = windowWidth;
-  h = windowHeight;
+  if (windowWidth > 600) {
+    w = windowWidth / 2;
+    h = windowHeight / 2;
+  } else {
+    w = windowWidth / 4;
+    h = windowHeight / 4;
+  }
   return {"width" : w, "height": h}
 }
 
 function windowResized() {
-  if (window_width == displayWidth) { // preevent resizing triggered by scrolling on small devices
+  if (window_width == windowWidth) { // preevent resizing triggered by scrolling on small devices
     return;
   }
+  window_width = windowWidth;
 
-  window_width = displayWidth;
-  size = calculateSize();
-  resizeCanvas(size.width, size.height);
+  let size = calculateSize();
+  buffer = createGraphics(size.width, size.height);
+  stretched_buffer = createGraphics(windowWidth, windowHeight);
+  stretched_buffer.colorMode(HSB, 100);
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 function mouseClicked() {

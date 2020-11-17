@@ -1,6 +1,6 @@
 @font-face {
   font-family: FFFFORWA;
-  src: url(\assets\FFFFORWA.ttf);
+  src: url(../assets/FFFFORWA.ttf);
 }
 
 body, body * {
@@ -15,8 +15,8 @@ a {
 }
 
 #sketch {
-  width: 100vh;
-  height: 100vw;
+  width: 100vw;
+  height: 100vh;
   position: absolute;
   top: 0;
   left: 0;
