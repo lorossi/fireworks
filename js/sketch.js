@@ -15,33 +15,29 @@ function preload() {
 
 function setup() {
   // SKETCH PARAMETERS
-  let w, h;
   window_width = displayWidth;
-
   if (displayWidth > 600) {
     starting_fireworks = 2;
-    fireworks_number = 10;
+    fireworks_number = 5;
     margin = 0.2;
     fps = 60;
-    w = windowWidth;
-    h = windowHeight;
   } else {
     starting_fireworks = 1;
     fireworks_number = 5;
     margin = 0.3;
-    fps = 30;
-    w = windowWidth / 4;
-    h = windowHeight / 4;
+    fps = 60;
   }
 
-  let canvas = createCanvas(w, h);
+  let size = calculateSize();
+  let canvas = createCanvas(size.width, size.height);
   canvas.parent('sketch');
+
   frameRate(fps);
   colorMode(HSB, 100);
 
   show_version = true;
   show_fps = true;
-  version = "1.0.5";
+  version = "1.1.0";
 
   fps_avg = fps;
   fps_len = 10; // number of fps to record and later average
@@ -507,21 +503,20 @@ class Sparkle extends Trail {
   }
 }
 
+function calculateSize() {
+  w = windowWidth;
+  h = windowHeight;
+  return {"width" : w, "height": h}
+}
+
 function windowResized() {
   if (window_width == displayWidth) { // preevent resizing triggered by scrolling on small devices
     return;
   }
 
   window_width = displayWidth;
-  let w, h;
-  if (windowWidth > 600) {
-    w = windowWidth;
-    h = windowHeight;
-  } else {
-    w = windowWidth / 4;
-    h = windowHeight / 4;
-  }
-  resizeCanvas(w, h);
+  size = calculateSize();
+  resizeCanvas(size.width, size.height);
 }
 
 function mouseClicked() {
